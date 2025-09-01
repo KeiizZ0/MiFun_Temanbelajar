@@ -57,6 +57,21 @@ body {
     font-size: 1.2rem;
     margin-bottom: 30px;
 }
+.mascot-image {
+    width: 200px;
+    height: auto;
+    margin: 15px 0;
+    border-radius: 15px;
+    
+}
+
+/* Loader Image */
+.loader-image {
+    width: 270px;
+    height: auto;
+    margin-bottom: -40px;
+    animation: none; /* Remove spinner animation */
+}
 
 /* Tombol - Mobile Optimized */
 .btn-primary, .btn-secondary {
@@ -268,7 +283,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgb(255, 255, 255);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -472,6 +487,41 @@ body {
         width: 44px;
         height: 44px;
         font-size: 18px;
+    }
+}
+
+/* Animated Dots */
+.animated-dots {
+    display: inline-block;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-left: 2px;
+}
+
+.dot {
+    opacity: 1;
+    animation: dot-blink 1.4s infinite;
+}
+
+.dot1 {
+    animation-delay: 0s;
+}
+
+.dot2 {
+    animation-delay: 0.4s;
+}
+
+.dot3 {
+    animation-delay: 0.8s;
+}
+
+@keyframes dot-blink {
+    0%, 50%, 100% {
+        opacity: 0.3;
+    }
+    25% {
+        opacity: 1;
     }
 }
 

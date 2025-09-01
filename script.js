@@ -1,6 +1,7 @@
 // GANTI DENGAN API KEY ANDA
 const API_KEY = "AIzaSyAhQ_VIw3-L1UUXxIo933FyaNu1c5IxpRg";
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+// URL API yang diperbaiki untuk Gemini 1.5 Flash
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // === ELEMEN DOM ===
 const landingPage = document.getElementById('landing-page');
@@ -33,6 +34,22 @@ let userAnswers = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let cluesUsed = 0;
+let loaderInterval = null;
+let currentLoaderImage = 0; // 0: Michelemembuatsoal.png, 1: michellesenyum.png
+
+/**
+* Toggle loader image between Michelemembuatsoal.png and michellesenyum.png
+*/
+function toggleLoaderImage() {
+    const loaderImage = document.getElementById('loader-image');
+    if (currentLoaderImage === 0) {
+        loaderImage.src = 'image/michellesenyum.png';
+        currentLoaderImage = 1;
+    } else {
+        loaderImage.src = 'image/Michelemembuatsoal.png';
+        currentLoaderImage = 0;
+    }
+}
 
 // === DATA SARAN MATERI ===
 const topicSuggestions = {
@@ -131,8 +148,8 @@ const topicSuggestions = {
 // === FUNGSI-FUNGSI UTAMA ===
 
 /**
- * Membuat prompt untuk Gemini API agar mengecek relevansi kategori dan topik
- */
+* Membuat prompt untuk Gemini API agar mengecek relevansi kategori dan topik
+*/
 function createRelevanceCheckPrompt(category, topic) {
     return `
     Anda adalah AI yang ahli dalam pendidikan di Indonesia. Evaluasi apakah kategori "${category}" dan topik "${topic}" cocok untuk kuis tingkat SMA di Indonesia.
@@ -154,8 +171,8 @@ function createRelevanceCheckPrompt(category, topic) {
 }
 
 /**
- * Mengecek relevansi kategori dan topik menggunakan Gemini API
- */
+* Mengecek relevansi kategori dan topik menggunakan Gemini API
+*/
 async function checkRelevance(category, topic) {
     try {
         const prompt = createRelevanceCheckPrompt(category, topic);
@@ -193,8 +210,8 @@ async function checkRelevance(category, topic) {
 }
 
 /**
- * Membuat prompt untuk Gemini API agar mengenerate soal dalam format JSON.
- */
+* Membuat prompt untuk Gemini API agar mengenerate soal dalam format JSON.
+*/
 function createQuizPrompt(category, topic, numQuestions) {
     return `
     Anda adalah AI pembuat kuis yang ahli. Buatkan ${numQuestions} soal pilihan ganda tentang materi "${topic}" dalam kategori "${category}".
@@ -235,10 +252,11 @@ function createQuizPrompt(category, topic, numQuestions) {
 }
 
 /**
- * Memanggil Gemini API untuk mendapatkan soal
- */
+* Memanggil Gemini API untuk mendapatkan soal
+*/
 async function generateQuestions(category, topic, numQuestions) {
     loader.classList.remove('hidden');
+    loaderInterval = setInterval(toggleLoaderImage, 500);
     try {
         const prompt = createQuizPrompt(category, topic, numQuestions);
         const response = await fetch(API_URL, {
@@ -271,13 +289,17 @@ async function generateQuestions(category, topic, numQuestions) {
         console.error("Error generating questions:", error);
         showAIErrorModal("Gagal membuat soal. Coba periksa API Key atau koneksi internet Anda. Detail: " + error.message);
         loader.classList.add('hidden');
+        if (loaderInterval) {
+            clearInterval(loaderInterval);
+            loaderInterval = null;
+        }
     }
 }
-        // Membersihkan string JSON dari markdown backticks
+    // Membersihkan string JSON dari markdown backticks
 
 /**
- * Memulai kuis setelah soal berhasil dibuat
- */
+* Memulai kuis setelah soal berhasil dibuat
+*/
 function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
@@ -290,12 +312,17 @@ function startQuiz() {
     quizPage.classList.add('active');
     loader.classList.add('hidden');
 
+    if (loaderInterval) {
+        clearInterval(loaderInterval);
+        loaderInterval = null;
+    }
+
     displayQuestion();
 }
 
 /**
- * Menampilkan soal, pilihan, dan petunjuk saat ini
- */
+* Menampilkan soal, pilihan, dan petunjuk saat ini
+*/
 function displayQuestion() {
     if (currentQuestionIndex >= questions.length) {
         showResults();
@@ -333,8 +360,8 @@ function displayQuestion() {
 
 
 /**
- * Menangani ketika pengguna memilih jawaban
- */
+* Menangani ketika pengguna memilih jawaban
+*/
 function handleAnswerSelection(e) {
     if (!e.target.matches('.option-btn')) return;
 
@@ -373,8 +400,8 @@ function handleAnswerSelection(e) {
 
 
 /**
- * Menampilkan clue tambahan atau penjelasan setelah menjawab
- */
+* Menampilkan clue tambahan atau penjelasan setelah menjawab
+*/
 function addClue() {
     const currentQuestion = questions[currentQuestionIndex];
     if (cluesUsed < 3 && cluesUsed < currentQuestion.clues.length) {
@@ -391,8 +418,8 @@ function addClue() {
 }
 
 /**
- * Menampilkan penjelasan singkat setelah menjawab soal
- */
+* Menampilkan penjelasan singkat setelah menjawab soal
+*/
 function showExplanation() {
     const currentQuestion = questions[currentQuestionIndex];
     const userAnswer = userAnswers[currentQuestionIndex];
@@ -415,8 +442,8 @@ function showExplanation() {
 }
 
 /**
- * Pindah ke soal berikutnya atau tampilkan hasil jika sudah selesai
- */
+* Pindah ke soal berikutnya atau tampilkan hasil jika sudah selesai
+*/
 function nextQuestion() {
     currentQuestionIndex++;
     if (currentQuestionIndex < questions.length) {
@@ -427,8 +454,8 @@ function nextQuestion() {
 }
 
 /**
- * Menampilkan halaman hasil akhir
- */
+* Menampilkan halaman hasil akhir
+*/
 function showResults() {
     quizPage.classList.remove('active');
     resultsPage.classList.add('active');
@@ -442,8 +469,8 @@ function showResults() {
 }
 
 /**
- * Menghitung dan menampilkan data analitik di dashboard
- */
+* Menghitung dan menampilkan data analitik di dashboard
+*/
 function populateDashboard() {
     const dashboard = document.getElementById('dashboard');
     dashboard.innerHTML = ''; // Kosongkan dulu
@@ -482,8 +509,8 @@ function populateDashboard() {
 }
 
 /**
- * Meminta analisis dari AI berdasarkan jawaban pengguna
- */
+* Meminta analisis dari AI berdasarkan jawaban pengguna
+*/
 async function getAnalysisFromAI() {
     const prompt = `
     Anda adalah seorang guru yang bijaksana dan suportif.
@@ -530,8 +557,8 @@ async function getAnalysisFromAI() {
 
 
 /**
- * Menampilkan modal saran materi berdasarkan kategori yang dipilih
- */
+* Menampilkan modal saran materi berdasarkan kategori yang dipilih
+*/
 function showTopicSuggestions() {
     const category = document.getElementById('category').value;
     const suggestionsCategoryEl = document.getElementById('suggestions-category');
@@ -559,8 +586,8 @@ function showTopicSuggestions() {
 }
 
 /**
- * Menerapkan materi yang dipilih ke input field
- */
+* Menerapkan materi yang dipilih ke input field
+*/
 function applySelectedTopics() {
     const checkboxes = document.querySelectorAll('#suggestions-list input[type="checkbox"]:checked');
     const selectedTopics = Array.from(checkboxes).map(cb => cb.value);
@@ -579,8 +606,8 @@ function applySelectedTopics() {
 }
 
 /**
- * Kembali ke halaman awal dan mereset state
- */
+* Kembali ke halaman awal dan mereset state
+*/
 function resetAndGoHome() {
     questions = [];
     userAnswers = [];

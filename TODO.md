@@ -1,10 +1,8 @@
-# TODO: Add Topic Suggestions Feature (Mobile Optimized)
+# TODO List for Modifying Landing Page and Loader
 
-## Steps to Complete:
-- [x] Add lightbulb icon button next to the topic input in index.html
-- [x] Add suggestions popup/modal with checkboxes for multi-select in index.html
-- [x] Define suggested topics for each category with details in script.js
-- [x] Add JavaScript logic to show/hide suggestions, handle multi-select, and update input field in script.js
-- [x] Style the new UI elements in style.css for a nice and interactive look
-- [x] Optimize UI for mobile devices with touch-friendly elements and responsive design
-- [ ] Test the new feature by selecting different categories and verifying topic suggestions work correctly on mobile
+- [x] Add mascot image (MichelleSenang.png) to landing page in index.html
+- [x] Replace loader div with img tag in index.html
+- [x] Add CSS styles for mascot and loader-image in style.css
+- [x] Add JavaScript logic to toggle loader image in script.js (using flag for reliable toggling, 500ms interval)
+- [x] Enlarge loader image size in style.css (increased from 80px to 150px)
+- [ ] Test the changes
