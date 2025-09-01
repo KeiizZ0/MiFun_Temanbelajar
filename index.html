@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeniQuiz - Generate Soal dengan AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <main id="landing-page" class="page active">
+        <div class="landing-content">
+            <h1>Selamat Datang di 🚀 GeniQuiz</h1>
+            <p>Uji pengetahuanmu dengan soal-soal tak terbatas yang dibuat khusus untukmu oleh AI.</p>
+            <button id="start-btn" class="btn-primary">Mulai Sekarang!</button>
+        </div>
+    </main>
+
+    <main id="quiz-page" class="page">
+        <div class="quiz-header">
+            <p>Soal <span id="question-number">1</span> dari <span id="total-questions">10</span></p>
+            <div id="score-display">Skor: 0</div>
+        </div>
+        <div class="quiz-container">
+            <h2 id="question-text">Memuat soal...</h2>
+            <div id="options-container" class="options-grid">
+                </div>
+            <div class="hint-container">
+                <h3>Petunjuk Pengerjaan</h3>
+                <p id="hint-text">Ini adalah petunjuk awal untuk soal.</p>
+                <div id="clue-container"></div>
+                <button id="add-clue-btn" class="btn-secondary">Minta Clue Tambahan (Sisa 3)</button>
+                <div id="conclusion-text" class="conclusion-text hidden"></div>
+            </div>
+            <button id="next-question-btn" class="btn-primary hidden">Lanjut ke Soal Berikutnya</button>
+        </div>
+    </main>
+
+    <main id="results-page" class="page">
+        <div class="results-container">
+            <h1>🎉 Tes Selesai!</h1>
+            <h2>Hasil Keseluruhan</h2>
+            <p id="final-score">Skor Akhir Anda: 8 dari 10 (80%)</p>
+        <h3>Analisis dari AI:</h3>
+        <div id="analysis-text" class="analysis-box">
+            <div class="loader-small"></div>
+            <p>Sedang menganalisis jawaban Anda...</p>
+        </div>
+
+        <h3>Dashboard Analitik</h3>
+        <div id="dashboard" class="analysis-box">
+            <p>Memuat data analitik...</p>
+        </div>
+
+        <button id="back-to-home-btn" class="btn-primary">Kembali ke Awal</button>
+    </div>
+</main>
+
+    <div id="setup-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Atur Kuis Anda</h2>
+            <form id="quiz-setup-form">
+                <label for="category">Pilih Kategori:</label>
+                <select id="category" name="category">
+                    <option value="Matematika">Matematika</option>
+                    <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                    <option value="Bahasa Inggris">Bahasa Inggris</option>
+                </select>
+
+                <label for="topic">Materi yang ingin diperdalam:</label>
+                <div class="topic-input-container">
+                    <input type="text" id="topic" name="topic" placeholder="Contoh: Aljabar, Puisi, Simple Present Tense" required>
+                    <button type="button" id="suggest-topic-btn" class="suggest-btn" title="Sarankan materi">
+                        💡
+                    </button>
+                </div>
+
+                <label for="num-questions">Jumlah Soal:</label>
+                <select id="num-questions" name="num-questions">
+                    <option value="5">5 Soal</option>
+                    <option value="10">10 Soal</option>
+                    <option value="15">15 Soal</option>
+                </select>
+                
+                <button type="submit" class="btn-primary">Mulai!</button>
+                <button type="button" id="close-modal-btn" class="btn-secondary">Batal</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loader" class="loader-overlay hidden">
+        <div class="loader"></div>
+        <p>AI sedang menyiapkan soal untukmu...</p>
+    </div>
+
+    <div id="relevance-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>⚠️ Kategori atau Topik Tidak Relevan</h2>
+            <p id="relevance-message">Pesan relevansi akan ditampilkan di sini.</p>
+            <button id="close-relevance-modal-btn" class="btn-secondary">Tutup</button>
+        </div>
+    </div>
+
+    <div id="ai-error-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>❌ AI Error</h2>
+            <p id="ai-error-message">Terjadi kesalahan pada AI. Silakan coba lagi.</p>
+            <button id="close-ai-error-modal-btn" class="btn-secondary">Tutup</button>
+        </div>
+    </div>
+
+    <div id="topic-suggestions-modal" class="modal-overlay hidden">
+        <div class="modal-content suggestions-modal">
+            <h2>💡 Saran Materi untuk <span id="suggestions-category">Kategori</span></h2>
+            <div id="suggestions-list" class="suggestions-list">
+                <!-- Suggestions will be populated here -->
+            </div>
+            <div class="suggestions-actions">
+                <button id="apply-suggestions-btn" class="btn-primary">Terapkan Pilihan</button>
+                <button id="close-suggestions-modal-btn" class="btn-secondary">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
