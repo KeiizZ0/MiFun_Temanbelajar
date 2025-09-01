@@ -342,7 +342,7 @@ body {
 }
 
 .suggest-btn {
-    background: linear-gradient(135deg, #FFD700, #FFA500);
+    background: linear-gradient(135deg, #dfeeb6, #f8c059);
     border: none;
     border-radius: 50%;
     width: 48px;
