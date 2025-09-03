@@ -49,35 +49,100 @@ function updateInfoLog() {
     const workingCountEl = document.getElementById('working-count');
     usersCountEl.textContent = currentUsers;
     workingCountEl.textContent = workingOnQuiz;
+
+    // Persist working on quiz state in localStorage
+    const sessionId = sessionStorage.getItem('sessionId');
+    if (sessionId) {
+        localStorage.setItem(`user_${sessionId}_workingOnQuiz`, workingOnQuiz);
+    }
 }
 
 /**
 * Initialize info log on page load
+* Note: This is a client-side simulation. For real-time cross-device tracking,
+* a backend server or real-time service (e.g., Firebase, WebSocket) is required.
 */
 function initializeInfoLog() {
-    // Simulate incrementing users using sessionStorage to avoid increment on refresh
-    if (!sessionStorage.getItem('hasVisited')) {
-        const storedUsers = localStorage.getItem('currentUsers');
-        if (storedUsers) {
-            currentUsers = parseInt(storedUsers) + 1;
-        } else {
-            currentUsers = 1;
-        }
-        localStorage.setItem('currentUsers', currentUsers);
-        sessionStorage.setItem('hasVisited', 'true');
+    const sessionId = sessionStorage.getItem('sessionId') || generateSessionId();
+    const lastActivity = localStorage.getItem(`user_${sessionId}_lastActivity`);
+    const now = Date.now();
 
-        // Add event listener to decrement user count on page unload
-        window.addEventListener('beforeunload', () => {
-            const storedUsers = localStorage.getItem('currentUsers');
-            let usersCount = storedUsers ? parseInt(storedUsers) : 1;
-            usersCount = Math.max(usersCount - 1, 0);
-            localStorage.setItem('currentUsers', usersCount);
-        });
+    // Check if this is a new session or if the user was inactive for too long (e.g., 30 minutes)
+    if (!lastActivity || (now - parseInt(lastActivity)) > 30 * 60 * 1000) {
+        // New user or returning after inactivity
+        const storedUsers = localStorage.getItem('currentUsers') || '0';
+        currentUsers = parseInt(storedUsers) + 1;
+        localStorage.setItem('currentUsers', currentUsers);
+        sessionStorage.setItem('sessionId', sessionId);
     } else {
-        const storedUsers = localStorage.getItem('currentUsers');
-        currentUsers = storedUsers ? parseInt(storedUsers) : 1;
+        // Existing user, just update activity
+        const storedUsers = localStorage.getItem('currentUsers') || '1';
+        currentUsers = parseInt(storedUsers);
     }
+
+    // Update last activity timestamp
+    localStorage.setItem(`user_${sessionId}_lastActivity`, now);
+
+    // Load working on quiz state from localStorage
+    const storedWorking = localStorage.getItem(`user_${sessionId}_workingOnQuiz`);
+    workingOnQuiz = storedWorking ? parseInt(storedWorking) : 0;
+
+    // Set up periodic activity update and cleanup
+    setInterval(() => {
+        localStorage.setItem(`user_${sessionId}_lastActivity`, Date.now());
+    }, 60000); // Update every minute
+
+    // Cleanup inactive users on page load
+    cleanupInactiveUsers();
+
+    // Add event listener to decrement user count on page unload
+    window.addEventListener('beforeunload', () => {
+        const storedUsers = localStorage.getItem('currentUsers');
+        let usersCount = storedUsers ? parseInt(storedUsers) : 1;
+        usersCount = Math.max(usersCount - 1, 0);
+        localStorage.setItem('currentUsers', usersCount);
+        // Clear this user's data
+        localStorage.removeItem(`user_${sessionId}_lastActivity`);
+        localStorage.removeItem(`user_${sessionId}_workingOnQuiz`);
+    });
+
     updateInfoLog();
+}
+
+/**
+* Generate a unique session ID
+*/
+function generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+* Clean up inactive users (simulate server-side cleanup)
+*/
+function cleanupInactiveUsers() {
+    const now = Date.now();
+    const keys = Object.keys(localStorage);
+    let activeUsers = 0;
+
+    keys.forEach(key => {
+        if (key.startsWith('user_') && key.endsWith('_lastActivity')) {
+            const lastActivity = parseInt(localStorage.getItem(key));
+            if ((now - lastActivity) > 30 * 60 * 1000) { // 30 minutes
+                // Remove inactive user data
+                const sessionId = key.replace('user_', '').replace('_lastActivity', '');
+                localStorage.removeItem(key);
+                localStorage.removeItem(`user_${sessionId}_workingOnQuiz`);
+            } else {
+                activeUsers++;
+            }
+        }
+    });
+
+    // Update current users count based on active users
+    if (activeUsers > 0) {
+        localStorage.setItem('currentUsers', activeUsers);
+        currentUsers = activeUsers;
+    }
 }
 
 // Call initializeInfoLog on page load
