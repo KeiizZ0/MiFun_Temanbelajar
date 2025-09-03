@@ -37,144 +37,8 @@ let cluesUsed = 0;
 let loaderInterval = null;
 let currentLoaderImage = 0; // 0: Michelemembuatsoal.png, 1: michellesenyum.png
 
-// === INFO LOG STATE ===
-let currentUsers = 1;
-let workingOnQuiz = 0;
-
-/**
-* Update the info log display
-*/
-function updateInfoLog() {
-    const usersCountEl = document.getElementById('users-count');
-    const workingCountEl = document.getElementById('working-count');
-    usersCountEl.textContent = currentUsers;
-    workingCountEl.textContent = workingOnQuiz;
-
-    // Persist working on quiz state in localStorage
-    const sessionId = sessionStorage.getItem('sessionId');
-    if (sessionId) {
-        localStorage.setItem(`user_${sessionId}_workingOnQuiz`, workingOnQuiz);
-    }
-}
-
-/**
-* Initialize info log on page load
-* Note: This is a client-side simulation. For real-time cross-device tracking,
-* a backend server or real-time service (e.g., Firebase, WebSocket) is required.
-*/
-function initializeInfoLog() {
-    const sessionId = sessionStorage.getItem('sessionId') || generateSessionId();
-    const lastActivity = localStorage.getItem(`user_${sessionId}_lastActivity`);
-    const now = Date.now();
-
-    // Check if this session is already active (within last 5 minutes)
-    const isSessionActive = lastActivity && (now - parseInt(lastActivity)) <= 5 * 60 * 1000; // 5 minutes
-
-    if (!isSessionActive) {
-        // New session - check if we need to increment user count
-        const storedUsers = localStorage.getItem('currentUsers') || '0';
-        currentUsers = parseInt(storedUsers);
-
-        // Only increment if this is truly a new user (no recent activity from this session)
-        if (!lastActivity || (now - parseInt(lastActivity)) > 30 * 60 * 1000) {
-            currentUsers += 1;
-            localStorage.setItem('currentUsers', currentUsers);
-        }
-
-        sessionStorage.setItem('sessionId', sessionId);
-    } else {
-        // Existing active session
-        const storedUsers = localStorage.getItem('currentUsers') || '1';
-        currentUsers = parseInt(storedUsers);
-    }
-
-    // Update last activity timestamp
-    localStorage.setItem(`user_${sessionId}_lastActivity`, now);
-
-    // Load working on quiz state from localStorage
-    const storedWorking = localStorage.getItem(`user_${sessionId}_workingOnQuiz`);
-    workingOnQuiz = storedWorking ? parseInt(storedWorking) : 0;
-
-    // Set up periodic activity update and cleanup
-    setInterval(() => {
-        localStorage.setItem(`user_${sessionId}_lastActivity`, Date.now());
-    }, 60000); // Update every minute
-
-    // Set up periodic info log update every 5 seconds
-    setInterval(() => {
-        cleanupInactiveUsers();
-        updateInfoLog();
-        console.log(`[INFO LOG REFRESH] ${new Date().toLocaleTimeString()} - Users: ${currentUsers}, Working on Quiz: ${workingOnQuiz}`);
-    }, 5000); // Update every 5 seconds
-
-    // Cleanup inactive users on page load
-    cleanupInactiveUsers();
-
-    // Add event listener to decrement user count on page unload
-    window.addEventListener('beforeunload', () => {
-        // Only decrement if this is the last tab/window for this session
-        const sessionTabs = parseInt(sessionStorage.getItem('sessionTabs') || '1');
-        if (sessionTabs <= 1) {
-            const storedUsers = localStorage.getItem('currentUsers');
-            let usersCount = storedUsers ? parseInt(storedUsers) : 1;
-            usersCount = Math.max(usersCount - 1, 0);
-            localStorage.setItem('currentUsers', usersCount);
-            // Clear this user's data
-            localStorage.removeItem(`user_${sessionId}_lastActivity`);
-            localStorage.removeItem(`user_${sessionId}_workingOnQuiz`);
-        } else {
-            // Decrement tab count
-            sessionStorage.setItem('sessionTabs', sessionTabs - 1);
-        }
-    });
-
-    // Track number of tabs/windows for this session
-    const currentTabs = parseInt(sessionStorage.getItem('sessionTabs') || '0');
-    sessionStorage.setItem('sessionTabs', currentTabs + 1);
-
-    updateInfoLog();
-}
-
-/**
-* Generate a unique session ID
-*/
-function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-/**
-* Clean up inactive users (simulate server-side cleanup)
-*/
-function cleanupInactiveUsers() {
-    const now = Date.now();
-    const keys = Object.keys(localStorage);
-    let activeUsers = 0;
-
-    keys.forEach(key => {
-        if (key.startsWith('user_') && key.endsWith('_lastActivity')) {
-            const lastActivity = parseInt(localStorage.getItem(key));
-            if ((now - lastActivity) > 30 * 60 * 1000) { // 30 minutes
-                // Remove inactive user data
-                const sessionId = key.replace('user_', '').replace('_lastActivity', '');
-                localStorage.removeItem(key);
-                localStorage.removeItem(`user_${sessionId}_workingOnQuiz`);
-            } else {
-                activeUsers++;
-            }
-        }
-    });
-
-    // Update current users count based on active users
-    if (activeUsers > 0) {
-        localStorage.setItem('currentUsers', activeUsers);
-        currentUsers = activeUsers;
-    }
-}
-
-// Call initializeInfoLog on page load
-window.addEventListener('load', () => {
-    initializeInfoLog();
-});
+// === INFO LOG STATE REMOVED ===
+// All user online and working on quiz log functionality has been removed as requested
 
 /**
 * Toggle loader image between Michelemembuatsoal.png and michellesenyum.png
@@ -456,15 +320,7 @@ function startQuiz() {
         loaderInterval = null;
     }
 
-    // Set working on quiz
-    workingOnQuiz = 1;
-    updateInfoLog();
-
-    // Hide info log during quiz
-    const infoLog = document.getElementById('info-log');
-    if (infoLog) {
-        infoLog.style.display = 'none';
-    }
+    // Info log functionality removed
 
     displayQuestion();
 }
@@ -612,15 +468,7 @@ function showResults() {
     const percentage = ((score / questions.length) * 100).toFixed(0);
     finalScoreEl.textContent = `Skor Akhir Anda: ${score} dari ${questions.length} (${percentage}%)`;
 
-    // Set not working on quiz
-    workingOnQuiz = 0;
-    updateInfoLog();
-
-    // Show info log after quiz completion
-    const infoLog = document.getElementById('info-log');
-    if (infoLog) {
-        infoLog.style.display = 'block';
-    }
+    // Info log functionality removed
 
     populateDashboard();
 
@@ -773,15 +621,7 @@ function resetAndGoHome() {
     currentQuestionIndex = 0;
     score = 0;
 
-    // Set not working on quiz
-    workingOnQuiz = 0;
-    updateInfoLog();
-
-    // Show info log after going home
-    const infoLog = document.getElementById('info-log');
-    if (infoLog) {
-        infoLog.style.display = 'block';
-    }
+    // Info log functionality removed
 
     resultsPage.classList.remove('active');
     landingPage.classList.add('active');
