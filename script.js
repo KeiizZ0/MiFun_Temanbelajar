@@ -92,6 +92,12 @@ function initializeInfoLog() {
         localStorage.setItem(`user_${sessionId}_lastActivity`, Date.now());
     }, 60000); // Update every minute
 
+    // Set up periodic info log update every 5 seconds
+    setInterval(() => {
+        cleanupInactiveUsers();
+        updateInfoLog();
+    }, 5000); // Update every 5 seconds
+
     // Cleanup inactive users on page load
     cleanupInactiveUsers();
 
