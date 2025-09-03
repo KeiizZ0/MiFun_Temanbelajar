@@ -529,3 +529,20 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* Info Log Styles */
+.info-log {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(74, 144, 226, 0.85);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1500;
+    user-select: none;
+}

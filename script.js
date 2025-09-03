@@ -37,6 +37,54 @@ let cluesUsed = 0;
 let loaderInterval = null;
 let currentLoaderImage = 0; // 0: Michelemembuatsoal.png, 1: michellesenyum.png
 
+// === INFO LOG STATE ===
+let currentUsers = 1;
+let workingOnQuiz = 0;
+
+/**
+* Update the info log display
+*/
+function updateInfoLog() {
+    const usersCountEl = document.getElementById('users-count');
+    const workingCountEl = document.getElementById('working-count');
+    usersCountEl.textContent = currentUsers;
+    workingCountEl.textContent = workingOnQuiz;
+}
+
+/**
+* Initialize info log on page load
+*/
+function initializeInfoLog() {
+    // Simulate incrementing users using sessionStorage to avoid increment on refresh
+    if (!sessionStorage.getItem('hasVisited')) {
+        const storedUsers = localStorage.getItem('currentUsers');
+        if (storedUsers) {
+            currentUsers = parseInt(storedUsers) + 1;
+        } else {
+            currentUsers = 1;
+        }
+        localStorage.setItem('currentUsers', currentUsers);
+        sessionStorage.setItem('hasVisited', 'true');
+
+        // Add event listener to decrement user count on page unload
+        window.addEventListener('beforeunload', () => {
+            const storedUsers = localStorage.getItem('currentUsers');
+            let usersCount = storedUsers ? parseInt(storedUsers) : 1;
+            usersCount = Math.max(usersCount - 1, 0);
+            localStorage.setItem('currentUsers', usersCount);
+        });
+    } else {
+        const storedUsers = localStorage.getItem('currentUsers');
+        currentUsers = storedUsers ? parseInt(storedUsers) : 1;
+    }
+    updateInfoLog();
+}
+
+// Call initializeInfoLog on page load
+window.addEventListener('load', () => {
+    initializeInfoLog();
+});
+
 /**
 * Toggle loader image between Michelemembuatsoal.png and michellesenyum.png
 */
@@ -317,6 +365,16 @@ function startQuiz() {
         loaderInterval = null;
     }
 
+    // Set working on quiz
+    workingOnQuiz = 1;
+    updateInfoLog();
+
+    // Hide info log during quiz
+    const infoLog = document.getElementById('info-log');
+    if (infoLog) {
+        infoLog.style.display = 'none';
+    }
+
     displayQuestion();
 }
 
@@ -463,6 +521,16 @@ function showResults() {
     const percentage = ((score / questions.length) * 100).toFixed(0);
     finalScoreEl.textContent = `Skor Akhir Anda: ${score} dari ${questions.length} (${percentage}%)`;
 
+    // Set not working on quiz
+    workingOnQuiz = 0;
+    updateInfoLog();
+
+    // Show info log after quiz completion
+    const infoLog = document.getElementById('info-log');
+    if (infoLog) {
+        infoLog.style.display = 'block';
+    }
+
     populateDashboard();
 
     getAnalysisFromAI();
@@ -526,7 +594,7 @@ async function getAnalysisFromAI() {
     Hasil: ${ans.isCorrect ? 'Benar' : 'SALAH'}
     `).join('')}
 
-    Tolong berikan analisis singkat dan membangun dalam 2-3 paragraf. 
+    Tolong berikan analisis singkat dan membangun dalam 2 paragraf. 
     Fokus pada:
     1. Memberikan pujian atas jawaban yang benar.
     2. Mengidentifikasi pola kesalahan (jika ada) dari jawaban yang salah.
@@ -613,6 +681,16 @@ function resetAndGoHome() {
     userAnswers = [];
     currentQuestionIndex = 0;
     score = 0;
+
+    // Set not working on quiz
+    workingOnQuiz = 0;
+    updateInfoLog();
+
+    // Show info log after going home
+    const infoLog = document.getElementById('info-log');
+    if (infoLog) {
+        infoLog.style.display = 'block';
+    }
 
     resultsPage.classList.remove('active');
     landingPage.classList.add('active');
