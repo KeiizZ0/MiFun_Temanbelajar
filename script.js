@@ -67,15 +67,23 @@ function initializeInfoLog() {
     const lastActivity = localStorage.getItem(`user_${sessionId}_lastActivity`);
     const now = Date.now();
 
-    // Check if this is a new session or if the user was inactive for too long (e.g., 30 minutes)
-    if (!lastActivity || (now - parseInt(lastActivity)) > 30 * 60 * 1000) {
-        // New user or returning after inactivity
+    // Check if this session is already active (within last 5 minutes)
+    const isSessionActive = lastActivity && (now - parseInt(lastActivity)) <= 5 * 60 * 1000; // 5 minutes
+
+    if (!isSessionActive) {
+        // New session - check if we need to increment user count
         const storedUsers = localStorage.getItem('currentUsers') || '0';
-        currentUsers = parseInt(storedUsers) + 1;
-        localStorage.setItem('currentUsers', currentUsers);
+        currentUsers = parseInt(storedUsers);
+
+        // Only increment if this is truly a new user (no recent activity from this session)
+        if (!lastActivity || (now - parseInt(lastActivity)) > 30 * 60 * 1000) {
+            currentUsers += 1;
+            localStorage.setItem('currentUsers', currentUsers);
+        }
+
         sessionStorage.setItem('sessionId', sessionId);
     } else {
-        // Existing user, just update activity
+        // Existing active session
         const storedUsers = localStorage.getItem('currentUsers') || '1';
         currentUsers = parseInt(storedUsers);
     }
@@ -104,14 +112,25 @@ function initializeInfoLog() {
 
     // Add event listener to decrement user count on page unload
     window.addEventListener('beforeunload', () => {
-        const storedUsers = localStorage.getItem('currentUsers');
-        let usersCount = storedUsers ? parseInt(storedUsers) : 1;
-        usersCount = Math.max(usersCount - 1, 0);
-        localStorage.setItem('currentUsers', usersCount);
-        // Clear this user's data
-        localStorage.removeItem(`user_${sessionId}_lastActivity`);
-        localStorage.removeItem(`user_${sessionId}_workingOnQuiz`);
+        // Only decrement if this is the last tab/window for this session
+        const sessionTabs = parseInt(sessionStorage.getItem('sessionTabs') || '1');
+        if (sessionTabs <= 1) {
+            const storedUsers = localStorage.getItem('currentUsers');
+            let usersCount = storedUsers ? parseInt(storedUsers) : 1;
+            usersCount = Math.max(usersCount - 1, 0);
+            localStorage.setItem('currentUsers', usersCount);
+            // Clear this user's data
+            localStorage.removeItem(`user_${sessionId}_lastActivity`);
+            localStorage.removeItem(`user_${sessionId}_workingOnQuiz`);
+        } else {
+            // Decrement tab count
+            sessionStorage.setItem('sessionTabs', sessionTabs - 1);
+        }
     });
+
+    // Track number of tabs/windows for this session
+    const currentTabs = parseInt(sessionStorage.getItem('sessionTabs') || '0');
+    sessionStorage.setItem('sessionTabs', currentTabs + 1);
 
     updateInfoLog();
 }
