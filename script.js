@@ -96,6 +96,7 @@ function initializeInfoLog() {
     setInterval(() => {
         cleanupInactiveUsers();
         updateInfoLog();
+        console.log(`[INFO LOG REFRESH] ${new Date().toLocaleTimeString()} - Users: ${currentUsers}, Working on Quiz: ${workingOnQuiz}`);
     }, 5000); // Update every 5 seconds
 
     // Cleanup inactive users on page load
