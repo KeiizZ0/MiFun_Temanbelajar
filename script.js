@@ -216,11 +216,21 @@ async function checkRelevance(category, topic) {
 * Membuat prompt untuk Gemini API agar mengenerate soal dalam format JSON.
 */
 function createQuizPrompt(category, topic, numQuestions) {
+    const mathInstruction = category === "Matematika" ? `
+    Karena ini kategori Matematika, gunakan notasi LaTeX untuk semua ekspresi matematika.
+    Gunakan \\( ... \\) untuk inline math dan \\[ ... \\] untuk display math jika diperlukan.
+    Contoh: \\( \\log_2 8 + \\log_3 9 \\), \\( \\frac{a}{b} \\), \\( x^2 + 2x + 1 \\), \\( \\int_0^1 x^2 \\, dx \\).
+    Pastikan semua simbol matematika seperti pangkat, akar, integral, dll. menggunakan LaTeX yang benar.
+    Gunakan tanda dolar tunggal $...$ untuk inline math dan tanda dolar ganda $$...$$ untuk display math.
+    Jangan gunakan backslash tunggal tanpa escape.
+    Contoh yang benar: $x^2 + y^2 = z^2$, $$\\int_0^1 x^2 dx$$.
+    ` : '';
+
     return `
     Anda adalah AI pembuat kuis yang ahli. Buatkan ${numQuestions} soal pilihan ganda tentang materi "${topic}" dalam kategori "${category}".
     Pastikan soal sesuai untuk level SMA di Indonesia.
     Setiap soal harus memiliki 4 pilihan ganda (A, B, C, D).
-    
+    ${mathInstruction}
     Untuk setiap soal, sertakan:
     1. "question": Teks pertanyaan.
     2. "options": Sebuah objek dengan kunci "A", "B", "C", "D".
@@ -280,12 +290,15 @@ async function generateQuestions(category, topic, numQuestions) {
         }
 
         const data = await response.json();
-        const jsonString = data.candidates[0].content.parts[0].text;
+        let jsonString = data.candidates[0].content.parts[0].text;
         
         // Membersihkan string JSON dari markdown backticks
-        const cleanedJson = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
-        
-        questions = JSON.parse(cleanedJson);
+        jsonString = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        // Perbaiki tanda backslash yang tidak di-escape dengan benar
+        jsonString = jsonString.replace(/\\([^"\\/bfnrtu])/g, '\\\\$1');
+
+        questions = JSON.parse(jsonString);
         userAnswers = []; // Reset riwayat jawaban
         startQuiz();
     } catch (error) {
@@ -298,6 +311,7 @@ async function generateQuestions(category, topic, numQuestions) {
         }
     }
 }
+        // Membersihkan string JSON dari markdown backticks
     // Membersihkan string JSON dari markdown backticks
 
 /**
@@ -338,7 +352,7 @@ function displayQuestion() {
 
     questionNumberEl.textContent = currentQuestionIndex + 1;
     totalQuestionsEl.textContent = questions.length;
-    questionTextEl.textContent = currentQuestion.question;
+    questionTextEl.innerHTML = currentQuestion.question;
 
     optionsContainer.innerHTML = '';
     Object.entries(currentQuestion.options).forEach(([key, value]) => {
@@ -361,6 +375,11 @@ function displayQuestion() {
     addClueBtn.textContent = `Minta Clue Tambahan (Sisa ${3 - cluesUsed})`;
     addClueBtn.disabled = cluesUsed >= 3;
     nextQuestionBtn.classList.add('hidden');
+
+    // Render MathJax setelah content di-set
+    if (window.MathJax) {
+        MathJax.typeset();
+    }
 }
 
 
@@ -436,14 +455,21 @@ function showExplanation() {
     addClueBtn.style.display = 'none';
     clueContainer.style.display = 'none';
 
-    // Tampilkan kesimpulan
+    // Tampilkan kesimpulan dengan render math menggunakan innerHTML
     const isCorrect = userAnswer.isCorrect;
+    const correctAnswerKey = currentQuestion.correctAnswer;
+    const correctAnswerText = currentQuestion.options[correctAnswerKey];
     const conclusion = isCorrect
         ? `✅ Jawaban Anda benar! ${currentQuestion.explanation}`
-        : `❌ Jawaban Anda salah. Jawaban yang benar adalah ${currentQuestion.correctAnswer} (${questions[currentQuestionIndex].options[currentQuestion.correctAnswer]}). ${currentQuestion.explanation}`;
+        : `❌ Jawaban Anda salah. Jawaban yang benar adalah ${correctAnswerKey} (${correctAnswerText}). ${currentQuestion.explanation}`;
 
-    conclusionTextEl.textContent = conclusion;
+    conclusionTextEl.innerHTML = conclusion;
     conclusionTextEl.classList.remove('hidden');
+
+    // Render MathJax untuk kesimpulan
+    if (window.MathJax) {
+        MathJax.typesetPromise([conclusionTextEl]).catch((err) => console.error(err.message));
+    }
 }
 
 /**

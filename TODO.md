@@ -1,8 +1,13 @@
-# TODO List for Modifying Landing Page and Loader
+# TODO: Support Math Rendering for All Topics
 
-- [x] Add mascot image (MichelleSenang.png) to landing page in index.html
-- [x] Replace loader div with img tag in index.html
-- [x] Add CSS styles for mascot and loader-image in style.css
-- [x] Add JavaScript logic to toggle loader image in script.js (using flag for reliable toggling, 500ms interval)
-- [x] Enlarge loader image size in style.css (increased from 80px to 150px)
-- [ ] Test the changes
+## Completed Tasks
+- [x] Analyze current code and identify issues with math rendering
+- [x] Brainstorm plan to integrate MathJax and modify AI prompts
+
+## Pending Tasks
+- [x] Add MathJax library to index.html
+- [x] Modify createQuizPrompt to generate LaTeX math expressions
+- [x] Update displayQuestion function to use innerHTML and render MathJax
+- [x] Update option buttons to render math in options
+- [x] Ensure conclusion text renders math if present
+- [ ] Test the implementation with math questions
